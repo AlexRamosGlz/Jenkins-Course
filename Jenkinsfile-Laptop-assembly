@@ -1,19 +1,39 @@
 pipeline {
     agent any
 
+    environment {
+        BUILD_FILE_NAME = 'laptop.txt'
+    }
+
     stages {
         stage('Build') {
             steps {
                 cleanWs()
                 echo 'Building a new laptop...'
-                sh 'mkdir -p build'
-                sh 'touch build/computer.txt'
-                sh 'echo "Mainboard" >> build/computer.txt'
-                sh 'cat build/computer.txt'
-                sh 'echo "Display" >> build/computer.txt'
-                sh 'cat build/computer.txt'
-                sh 'echo "Keyboard" >> build/computer.txt'
-                sh 'cat build/computer.txt'
+                sh '''
+                    mkdir -p build
+                    touch build/$BUILD_FILE_NAME
+                    
+                    echo "Mainboard" >> build/$BUILD_FILE_NAME
+                    cat build/$BUILD_FILE_NAME
+                    
+                    echo "Display" >> build/$BUILD_FILE_NAME
+                    cat build/$BUILD_FILE_NAME
+                    
+                    echo "Keyboard" >> build/$BUILD_FILE_NAME
+                    cat build/$BUILD_FILE_NAME
+                '''
+            }
+        }
+
+        stage('Test') {
+            steps{
+                echo "Testing the new Laptop..."
+                sh 'test -f build/$BUILD_FILE_NAME'
+
+                sh '''
+                    grep -iE 'mainboard|display|keyboard' build/$BUILD_FILE_NAME
+                '''
             }
         }
     }

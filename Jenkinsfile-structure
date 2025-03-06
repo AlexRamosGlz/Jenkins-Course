@@ -1,6 +1,12 @@
 pipeline {
     agent any   // la directiva "agent" instruye a jenkins de alocar un ejecutor (node) y workspace para la Pipeline 
 
+    environment {   // la section environment es usada para almacenar y declarar todas las 
+                    // variables de entorno de nuestra pipeline
+
+        VAR_NAME='value' // se declara igual que una variable en Linux
+    }
+
     stages {    // "stages" se podria decir que es un codeblock donde viviran los "stage"
         
         stage('Build') {    // "stage" una etapa del pipeline, en este caso la etapa "Build", puede haber muchos mas "stages"
@@ -12,7 +18,17 @@ pipeline {
                 echo 'Building a new laptop...'
                 
                 sh 'mkdir -p build' // "sh o shell step" es usado para ejecutar un shell command
+
+                sh '''              
+                    echo "comando 1"
+                    echo "comando 2"
+                '''                 // para combinar muchos comandos 'sh' en uno solo se puede usar el anterior formato 
+                                    // con los " ''' "
             }
+        }
+
+        stage('test') {     // otra stage, la stages se corren sincronicamente
+            ...
         }
     }
     
