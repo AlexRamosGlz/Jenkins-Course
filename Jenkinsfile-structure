@@ -1,19 +1,30 @@
 pipeline {
-    agent any
+    agent any   // la directiva "agent" instruye a jenkins de alocar un ejecutor (node) y workspace para la Pipeline 
 
-    stages {
-        stage('Build') {
-            steps {
-                cleanWs()
+    stages {    // "stages" se podria decir que es un codeblock donde viviran los "stage"
+        
+        stage('Build') {    // "stage" una etapa del pipeline, en este caso la etapa "Build", puede haber muchos mas "stages"
+            
+            steps {     // la secccion "step" define una serie de acciones a ejecutar dentro en una directiva "stage"
+                
+                cleanWs() // "cleanWs()" es una funcion que limpia el worksapce de nuestra pipeline
+                
                 echo 'Building a new laptop...'
-                sh 'mkdir -p build'
+                
+                sh 'mkdir -p build' // "sh o shell step" es usado para ejecutar un shell command
             }
         }
     }
     
-    post {
-        success {
-         archiveArtifacts artifacts: 'build/**'   
+    post { // "post", es una seccion donde van todos los post actions, esta seccion se ejecuta siempre al final de 
+           // la pipeline
+
+        success {   // "success" es un post action que solo se ejectua cuando la pipeline sea ha completado con exito
+
+
+         archiveArtifacts artifacts: 'build/**'     // "arcvhieArtifacts" guarda los archivos built que incluyen el 
+                                                    // patron proveido, en este caso "build/**", en el jenkins controller
+                                                    // para que su extraccion despues                              
         }
     }
 }
