@@ -30,6 +30,31 @@ pipeline {
         stage('test') {     // otra stage, la stages se corren sincronicamente
             ...
         }
+
+        stage('con docker') { // Usar docker como ambiente en nuestra pipeline 
+            agent { 
+
+                docker { // Docker es usado para no tener que instalar dependencias en el jenkins controller, cualquier
+                         // dependencia o herramiento que puede ser empacada en Docker se podra usar facilmente en nuestra
+                         // pipeline haciendo pocos cambios a nuestro Jenkinsfile    
+                    
+                    image 'node:18-alipe' // Podemos usar una docker image como nuestro ambiente de ejecucion
+                                          // para una stage en particular o la pipeline entera
+
+                    reuseNode true // "reuseNode true" es usado para usar el mismo nodo declarado en al comienzo de la pipeline
+                                   // en este caso "any" en vez de crear un nuevo nodo para esta stage
+
+                                   // En otras palabras ejectura el container el node especificado en la directiva "agent any",
+                                   // compartiendo el mismo workspace en vez de ejectuarce en un nuevo nodo y workspace 
+                }
+            }
+
+            steps {
+                sh 'echo "con docker"'
+                sh 'dcoker --version' // podemos usar comandos de docker en nuestra pipeline que de otro modo no podriamos
+                                      // amenos que instalemos dependencias en Jenkins
+            }
+        }
     }
     
     post { // "post", es una seccion donde van todos los post actions, esta seccion se ejecuta siempre al final de 
