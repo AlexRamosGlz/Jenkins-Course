@@ -54,6 +54,63 @@ pipeline {
                                       // amenos que instalemos dependencias en Jenkins
             }
         }
+
+        stage('E2E with playwrigth') { // Se puede usar el framework playwright para hacer E2E (End-to-End) testing
+            agent {
+                docker {
+                    image 'last-playwright-image (https://playwright.dev/docs/docker#pull-the-image)' // Asegurarse de que la version de la imagen sea la
+                                                                                                      // misma que este instalada en los node_modules
+                    reuseNode true
+                }
+            }
+
+            steps {
+                sh '''
+                    ...
+
+                    npx playwrigth test --reporter=html  // playwright tiene la funcione de usar una pagina web (html) como test reporter 
+                '''
+            }
+        }
+    }
+
+    // *** Ejecutar stages en paralelo *** //
+
+    stage('Tests') { 
+        parallel {  // Al correr stages en paralelo se reduce el tiempo en que dura la pipeline haciendo mas eficiente el trabajo 
+
+                        // NOTA: se debe usar la keyword "parallel" para indicar que las stages dentro de 'Tests' seran
+                        // ejecutadas en paralelo
+
+
+            stage('Unit Test') {
+                ....
+
+                post {  // asi mismo podemos hacer post actions por cada stage y no una post action por toda la pipeline
+                    
+                    always {
+                    
+                        junit 'jest-results/junit.xml'
+                    
+                    }
+                }
+            }
+
+            stage('Playwright E2E Test') {
+                ...
+
+                post {
+
+                    always {
+
+                        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, 
+                            reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'playwright HTML Report', 
+                            reportTitles: '', useWrapperFileDirectly: true])
+                    
+                    }
+                }
+            }
+        }
     }
     
     post { // "post", es una seccion donde van todos los post actions, esta seccion se ejecuta siempre al final de 
@@ -70,6 +127,14 @@ pipeline {
         always {    // "always" es un post action que se ejecuta siempre al final de la pipeline
 
             junit 'test-results/junit.xml'  // es un plugin que nos muestra una linea de tiempo de los test suites guardados en el workspace
+
+                // NOTA: playwrigh puede sobre-escribir el directorio de test-results, para evitar esto se puede editar el archivo "package.json",
+                // para cambiar el "OutputDirectory" del "jest-junit" proccesor
+
+            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, 
+                reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'playwright HTML Report', 
+                reportTitles: '', useWrapperFileDirectly: true])    // Este es un plugin de jenkis que muestra los reportes generados en HTML
+                                                                    // esta linea es generada desde la conifuracion de pipeline en "pipeline syntax"
         }
     }
 }
