@@ -16,7 +16,6 @@ pipeline {
                 cleanWs() // "cleanWs()" es una funcion que limpia el worksapce de nuestra pipeline
                 
                 echo 'Building a new laptop...'
-                
                 sh 'mkdir -p build' // "sh o shell step" es usado para ejecutar un shell command
 
                 sh '''              
@@ -66,6 +65,11 @@ pipeline {
          archiveArtifacts artifacts: 'build/**'     // "arcvhieArtifacts" guarda los archivos built que incluyen el 
                                                     // patron proveido, en este caso "build/**", en el jenkins controller
                                                     // para que su extraccion despues                              
+        }
+
+        always {    // "always" es un post action que se ejecuta siempre al final de la pipeline
+
+            junit 'test-results/junit.xml'  // es un plugin que nos muestra una linea de tiempo de los test suites guardados en el workspace
         }
     }
 }
