@@ -1,65 +1,104 @@
 pipeline {
-    agent any   // la directiva "agent" instruye a jenkins de alocar un ejecutor (node) y workspace para la Pipeline 
+    agent any   
+        
+        // la directiva "agent" instruye a jenkins de alocar un ejecutor (node) 
+        // y workspace para la Pipeline 
 
-    environment {   // la section environment es usada para almacenar y declarar todas las 
-                    // variables de entorno de nuestra pipeline
+    environment {   
+        
+        // la section environment es usada para almacenar y declarar todas las 
+        // variables de entorno de nuestra pipeline
 
-        VAR_NAME='value' // se declara igual que una variable en Linux
+        VAR_NAME='value' 
+        
+            // se declara igual que una variable en Linux
     }
 
-    stages {    // "stages" se podria decir que es un codeblock donde viviran los "stage"
+    stages {    
         
-        stage('Build') {    // "stage" una etapa del pipeline, en este caso la etapa "Build", puede haber muchos mas "stages"
+        // "stages" se podria decir que es un codeblock donde viviran los "stage"
+    
+        stage('Build') {    
             
-            steps {     // la secccion "step" define una serie de acciones a ejecutar dentro en una directiva "stage"
+            // "stage" una etapa del pipeline, en este caso la etapa "Build", puede 
+            // haber muchos mas "stages"
+            
+            steps {     
                 
-                cleanWs() // "cleanWs()" es una funcion que limpia el worksapce de nuestra pipeline
+                // la secccion "step" define una serie de acciones a ejecutar dentro en una directiva "stage"
+                
+                cleanWs() 
+                
+                    // "cleanWs()" es una funcion que limpia el worksapce de nuestra pipeline
                 
                 echo 'Building a new laptop...'
-                sh 'mkdir -p build' // "sh o shell step" es usado para ejecutar un shell command
+                
+                sh 'mkdir -p build' 
+                
+                    // "sh o shell step" es usado para ejecutar un shell command
 
                 sh '''              
                     echo "comando 1"
                     echo "comando 2"
-                '''                 // para combinar muchos comandos 'sh' en uno solo se puede usar el anterior formato 
-                                    // con los " ''' "
+                '''                 
+                    // para combinar muchos comandos 'sh' en uno solo se puede usar el anterior formato 
+                    // con los " ''' "
             }
         }
 
-        stage('test') {     // otra stage, la stages se corren sincronicamente
+        stage('test') {     
+            // otra stage, la stages se corren sincronicamente
             ...
         }
 
-        stage('con docker') { // Usar docker como ambiente en nuestra pipeline 
+        stage('con docker') { 
+            
+            // Usar docker como ambiente en nuestra pipeline 
+            
             agent { 
 
-                docker { // Docker es usado para no tener que instalar dependencias en el jenkins controller, cualquier
-                         // dependencia o herramiento que puede ser empacada en Docker se podra usar facilmente en nuestra
-                         // pipeline haciendo pocos cambios a nuestro Jenkinsfile    
+                docker { 
                     
-                    image 'node:18-alipe' // Podemos usar una docker image como nuestro ambiente de ejecucion
-                                          // para una stage en particular o la pipeline entera
+                    // Docker es usado para no tener que instalar dependencias en el jenkins controller, cualquier
+                    // dependencia o herramiento que puede ser empacada en Docker se podra usar facilmente en nuestra
+                    // pipeline haciendo pocos cambios a nuestro Jenkinsfile    
+                    
+                    image 'node:18-alipe' 
+                    
+                        // Podemos usar una docker image como nuestro ambiente de ejecucion
+                        // para una stage en particular o la pipeline entera
 
-                    reuseNode true // "reuseNode true" es usado para usar el mismo nodo declarado en al comienzo de la pipeline
-                                   // en este caso "any" en vez de crear un nuevo nodo para esta stage
+                    reuseNode true 
+                    
+                        // "reuseNode true" es usado para usar el mismo nodo declarado en al comienzo de la pipeline
+                        // en este caso "any" en vez de crear un nuevo nodo para esta stage
 
-                                   // En otras palabras ejectura el container el node especificado en la directiva "agent any",
-                                   // compartiendo el mismo workspace en vez de ejectuarce en un nuevo nodo y workspace 
+                        // En otras palabras ejectura el container el node especificado en la directiva "agent any",
+                        // compartiendo el mismo workspace en vez de ejectuarce en un nuevo nodo y workspace 
                 }
             }
 
             steps {
                 sh 'echo "con docker"'
-                sh 'dcoker --version' // podemos usar comandos de docker en nuestra pipeline que de otro modo no podriamos
-                                      // amenos que instalemos dependencias en Jenkins
+                
+                sh 'dcoker --version' 
+                
+                    // podemos usar comandos de docker en nuestra pipeline que de otro modo no podriamos
+                    // amenos que instalemos dependencias en Jenkins
             }
         }
 
-        stage('E2E with playwrigth') { // Se puede usar el framework playwright para hacer E2E (End-to-End) testing
+        stage('E2E with playwrigth') { 
+            
+            // Se puede usar el framework playwright para hacer E2E (End-to-End) testing
+            
             agent {
                 docker {
-                    image 'last-playwright-image (https://playwright.dev/docs/docker#pull-the-image)' // Asegurarse de que la version de la imagen sea la
-                                                                                                      // misma que este instalada en los node_modules
+                    image 'last-playwright-image (https://playwright.dev/docs/docker#pull-the-image)' 
+                    
+                        // Asegurarse de que la version de la imagen sea la
+                        // misma que este instalada en los node_modules
+                    
                     reuseNode true
                 }
             }
@@ -77,16 +116,20 @@ pipeline {
     // *** Ejecutar stages en paralelo *** //
 
     stage('Tests') { 
-        parallel {  // Al correr stages en paralelo se reduce el tiempo en que dura la pipeline haciendo mas eficiente el trabajo 
+        parallel {  
+            
+            // Al correr stages en paralelo se reduce el tiempo en que dura la pipeline haciendo mas eficiente el trabajo 
 
-                        // NOTA: se debe usar la keyword "parallel" para indicar que las stages dentro de 'Tests' seran
-                        // ejecutadas en paralelo
+                // NOTA: se debe usar la keyword "parallel" para indicar que las stages dentro de 'Tests' seran
+                // ejecutadas en paralelo
 
 
             stage('Unit Test') {
                 ....
 
-                post {  // asi mismo podemos hacer post actions por cada stage y no una post action por toda la pipeline
+                post {  
+                    
+                    // asi mismo podemos hacer post actions por cada stage y no una post action por toda la pipeline
                     
                     always {
                     
@@ -113,28 +156,40 @@ pipeline {
         }
     }
     
-    post { // "post", es una seccion donde van todos los post actions, esta seccion se ejecuta siempre al final de 
-           // la pipeline
+    post { 
+        
+        // "post", es una seccion donde van todos los post actions, esta seccion se ejecuta siempre al final de 
+        // la pipeline
 
-        success {   // "success" es un post action que solo se ejectua cuando la pipeline sea ha completado con exito
+        success {   
+            
+            // "success" es un post action que solo se ejectua cuando la pipeline sea ha completado con exito
 
 
-         archiveArtifacts artifacts: 'build/**'     // "arcvhieArtifacts" guarda los archivos built que incluyen el 
-                                                    // patron proveido, en este caso "build/**", en el jenkins controller
-                                                    // para que su extraccion despues                              
+         archiveArtifacts artifacts: 'build/**'     
+            
+            // "arcvhieArtifacts" guarda los archivos built que incluyen el 
+            // patron proveido, en este caso "build/**", en el jenkins controller
+            // para que su extraccion despues                              
         }
 
-        always {    // "always" es un post action que se ejecuta siempre al final de la pipeline
+        always {    
+            
+            // "always" es un post action que se ejecuta siempre al final de la pipeline
 
-            junit 'test-results/junit.xml'  // es un plugin que nos muestra una linea de tiempo de los test suites guardados en el workspace
+            junit 'test-results/junit.xml'  
+            
+            // es un plugin que nos muestra una linea de tiempo de los test suites guardados en el workspace
 
                 // NOTA: playwrigh puede sobre-escribir el directorio de test-results, para evitar esto se puede editar el archivo "package.json",
                 // para cambiar el "OutputDirectory" del "jest-junit" proccesor
 
             publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, 
                 reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'playwright HTML Report', 
-                reportTitles: '', useWrapperFileDirectly: true])    // Este es un plugin de jenkis que muestra los reportes generados en HTML
-                                                                    // esta linea es generada desde la conifuracion de pipeline en "pipeline syntax"
+                reportTitles: '', useWrapperFileDirectly: true])    
+                
+                    // Este es un plugin de jenkis que muestra los reportes generados en HTML
+                    // esta linea es generada desde la conifuracion de pipeline en "pipeline syntax"
         }
     }
 }
